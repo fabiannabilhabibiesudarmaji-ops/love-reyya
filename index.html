@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aku Minta Maaf Ya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      background-color: #0f141d;
+      color: #ffffff;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .card-bg {
+      background-color: #1e2430;
+    }
+    .text-pink-custom {
+      color: #ff497c;
+    }
+    .text-green-custom {
+      color: #22c55e;
+    }
+    .btn-red-custom {
+      background-color: #ef4444;
+    }
+    .btn-green-custom {
+      background-color: #22c55e;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden select-none">
+
+  <!-- Splash Screen untuk Interaksi Awal (Bypass Autoplay Browser) -->
+  <div id="splash" class="fixed inset-0 z-50 bg-[#0f141d] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-opacity duration-500">
+    <div class="animate-bounce mb-6 text-6xl">❤️</div>
+    <h2 class="text-2xl font-bold text-pink-custom mb-3">Klik di mana saja untuk membuka pesan</h2>
+    <p class="text-slate-400 text-sm">Musik akan otomatis diputar</p>
+  </div>
+
+  <!-- Audio Player Menggunakan Direct Link Catbox -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://files.catbox.moe/gdeqlz.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Tombol Kontrol Musik Melayang -->
+  <button id="musicToggle" onclick="toggleMusic(event)" class="fixed top-5 right-5 z-40 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full shadow-lg border border-slate-600 transition flex items-center justify-center">
+    <span id="musicIcon" class="text-xl">🎵</span>
+  </button>
+
+  <!-- Kartu Utama -->
+  <div class="w-full max-w-md card-bg rounded-2xl p-6 md:p-8 shadow-2xl border border-slate-700/50 text-center relative z-10 my-auto">
+    
+    <!-- Judul Utama -->
+    <h1 class="text-2xl md:text-3xl font-extrabold text-pink-custom mb-6 leading-tight">
+      Aku Minta Maaf ya reyyaa cucic culu.
+    </h1>
+
+    <!-- Isi Pesan -->
+    <p class="text-slate-200 text-base md:text-lg mb-6 leading-relaxed">
+      Hai, aku mau minta maaf kalau belakangan ini ada salah kata, perbuatan, atau sikapku yang bikin kamu kesal atau sedih.
+    </p>
+
+    <!-- Sub Judul Hijau -->
+    <div class="space-y-2 mb-8">
+      <p class="text-green-custom font-semibold text-base md:text-lg">
+        Aku sama sekali gak bermaksud begitu.
+      </p>
+      <p class="text-green-custom font-semibold text-base md:text-lg flex items-center justify-center gap-1">
+        Kamu mau kan maafin aku? ✨
+      </p>
+    </div>
+
+    <!-- Container Tombol -->
+    <div class="relative min-h-[140px] flex items-center justify-center">
+      
+      <!-- Tombol Mau (Muncul Setelah Interaksi) -->
+      <button id="btnMau" onclick="terimaMaaf()" class="hidden btn-green-custom hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform active:scale-95 text-lg z-20">
+        Mau ❤️️
+      </button>
+
+      <!-- Tombol Nggak (Dapat Melarikan Diri) -->
+      <button id="btnNggak" onmouseover="kabur()" onclick="kabur()" class="btn-red-custom hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all duration-200 text-lg absolute z-30">
+        Nggak
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Popup Pesan Dimaafkan -->
+  <div id="modalPesan" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="card-bg border border-pink-500/30 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl transform transition-all scale-90 opacity-0" id="modalContent">
+      <div class="text-5xl mb-4">🥰</div>
+      <h3 class="text-2xl font-bold text-pink-custom mb-2">Makasih Ya!</h3>
+      <p class="text-slate-300 mb-6">Makasih udah mau maafin aku. Aku janji bakal jadi yang lebih baik lagi buat kamu! ❤️</p>
+      <button onclick="tutupModal()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2.5 rounded-xl transition">
+        Sama-sama 💕
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const music = document.getElementById('bgMusic');
+    const splash = document.getElementById('splash');
+    const btnNggak = document.getElementById('btnNggak');
+    const btnMau = document.getElementById('btnMau');
+    const musicIcon = document.getElementById('musicIcon');
+    let isPlaying = false;
+
+    // Buka aplikasi & mulai musik
+    splash.addEventListener('click', () => {
+      splash.classList.add('opacity-0');
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 500);
+      playAudio();
+    });
+
+    function playAudio() {
+      music.play().then(() => {
+        isPlaying = true;
+        musicIcon.classList.add('animate-spin');
+      }).catch(err => console.log("Autoplay ditahan browser:", err));
+    }
+
+    function toggleMusic(e) {
+      e.stopPropagation();
+      if (isPlaying) {
+        music.pause();
+        isPlaying = false;
+        musicIcon.classList.remove('animate-spin');
+      } else {
+        music.play();
+        isPlaying = true;
+        musicIcon.classList.add('animate-spin');
+      }
+    }
+
+    // Fungsi tombol Nggak melarikan diri
+    function kabur() {
+      // Tampilkan tombol Mau jika belum muncul
+      btnMau.classList.remove('hidden');
+
+      const card = document.querySelector('.card-bg');
+      const cardRect = card.getBoundingClientRect();
+      const btnRect = btnNggak.getBoundingClientRect();
+
+      const maxX = (cardRect.width / 2) - (btnRect.width / 2) - 20;
+      const maxY = 60;
+
+      const randomX = (Math.random() * maxX * 2) - maxX;
+      const randomY = (Math.random() * maxY * 2) - maxY;
+
+      btnNggak.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    }
+
+    // Fungsi jika tombol Mau diklik
+    function terimaMaaf() {
+      // Efek Confetti
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      // Tampilkan Modal
+      const modal = document.getElementById('modalPesan');
+      const modalContent = document.getElementById('modalContent');
+      
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modalContent.classList.remove('scale-90', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function tutupModal() {
+      const modal = document.getElementById('modalPesan');
+      const modalContent = document.getElementById('modalContent');
+      
+      modalContent.classList.remove('scale-100', 'opacity-100');
+      modalContent.classList.add('scale-90', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+  </script>
+</body>
+</html>
